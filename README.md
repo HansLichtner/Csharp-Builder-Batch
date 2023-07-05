@@ -4,5 +4,5 @@ A simple batch script to build C# projects (.sln)
 
 
 
-### Como usar
+### How to Use
 Just drag and drop the project folder in batch file.
