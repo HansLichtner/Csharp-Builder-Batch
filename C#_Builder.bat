@@ -1,55 +1,104 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Local do MSBuild 2019
-set msBuild="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
+:: Local do MSBuild
+set MSBuild="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\MSBuild\Current\Bin\MSBuild.exe"
 
-echo Chamando o vsdevcmd 2019...
+:: Local do VsDevCmd
+set VsDevCmd="C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat"
+
+echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+echo ³ Inicializando o VsDevCmd ³
+echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 echo.
 call "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\Common7\Tools\VsDevCmd.bat"
 
-echo Executando limpeza de informaÃ§Ãµes de zona...
+set "rootFolder=%~1"
 echo.
 
-set "rootFolder=%~1"
-
-if not defined rootFolder (
-    echo Por favor, arraste a pasta para o script batch.
-    exit /b
+if "%rootFolder%"=="" (
+    goto :ChooseFolder
+) else (
+    goto :CleanZone
 )
+
+:ChooseFolder
+set "rootFolder="
+set /p "rootFolder=Arraste a pasta do projeto para c  e pressione Enter: "  
+echo.
+
+if not exist "%rootFolder%" (
+    echo Caminho inv lido. Verifique se o diret¢rio existe. 
+    echo.
+    goto :ChooseFolder
+)
+
+:CleanZone
+echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+echo ³ Limpando informa‡äes de zona... ³
+echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+echo.
 
 for /r "%rootFolder%" %%F in (*) do (
     echo. > "%%F:Zone.Identifier"
 )
 
-echo ConcluÃ­do! InformaÃ§Ãµes de zona limpas em todos os arquivos e pastas.
+echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+echo ³ Conclu¡do! Informa‡äes de zona limpas.  ³
+echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 echo.
 ::pause
 
-set "solutionFile="
-for /r "%rootFolder%" %%F in (*.sln) do (
-    set "solutionFile=%%F"
-    goto :Build
-)
-
-echo Arquivo .sln nÃ£o encontrado na pasta especificada.
-exit /b
-
 :Build
-echo Arquivo .sln encontrado: %solutionFile%
-echo.
-
+::Cria a pasta "Build"
 set "buildFolder=%rootFolder%\Build"
 if not exist "%buildFolder%" (
     mkdir "%buildFolder%"
 )
 
-echo Iniciando o build com MSBuild 2019...
-echo.
-%msBuild% -m "%solutionFile%" /t:Build /p:Configuration=Debug /p:Platform="Any CPU" /p:OutputPath="%buildFolder%"
-%msBuild% -m "%solutionFile%" /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:OutputPath="%buildFolder%"
+echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+echo ³ Localizando arquivos de projeto... ³
+echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-echo Build concluÃ­do com sucesso!
+for /r "%rootFolder%" %%F in (*.sln) do (
+    set "projectName=%%~nF"
+    echo Arquivo !projectName!.sln encontrado: %%F
+    echo.
+    echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    echo ³ Iniciando o build com MSBuild... ³
+    echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    echo.
+    %MSBuild% -m %%F /t:Build /p:Configuration=Debug /p:Platform="Any CPU" /p:OutputPath="%buildFolder%"
+    if !errorlevel! equ 0 (
+        echo.
+        echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+        echo ³ Build de !projectName! conclu¡do com sucesso! ³
+        echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+        echo.
+    ) else (
+        echo.
+        echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+        echo ³ Build de !projectName! falhou!  ³
+        echo ³ Verifique a falha de compila‡Æo ³
+        echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+        echo.
+    )
+    %MSBuild% -m %%F /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:OutputPath="%buildFolder%"
+    if !errorlevel! equ 0 (
+        echo.
+        echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+        echo ³ Build de !projectName! conclu¡do com sucesso! ³
+        echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+        echo.
+    ) else (
+        echo.
+        echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+        echo ³ Build de !projectName! falhou!  ³
+        echo ³ Verifique a falha de compila‡Æo ³
+        echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+        echo.
+    )
+)
 
 pause
 
