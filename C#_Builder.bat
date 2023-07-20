@@ -49,6 +49,31 @@ echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 echo.
 ::pause
 
+
+echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+echo ³ Localizando arquivos de projeto... ³
+echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+:: Variável para verificar se algum projeto foi encontrado
+set "projectFound="
+
+for /r "%rootFolder%" %%F in (*.sln) do (
+        set "projectFound=1"
+)
+
+:: Verificar se algum projeto foi encontrado
+if "%projectFound%"=="" (
+    echo.
+    echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    echo ³ Nenhum arquivo .sln encontrado na pasta especificada. ³
+    echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    echo.
+    goto :End
+) else (
+    goto :Build
+)
+
+
 :Build
 ::Cria a pasta "Build"
 set "buildFolder=%rootFolder%\Build"
@@ -56,19 +81,18 @@ if not exist "%buildFolder%" (
     mkdir "%buildFolder%"
 )
 
-echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-echo ³ Localizando arquivos de projeto... ³
-echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 for /r "%rootFolder%" %%F in (*.sln) do (
     set "projectName=%%~nF"
-    echo Arquivo !projectName!.sln encontrado: %%F
+    echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    echo ³ Arquivo !projectName!.sln encontrado: ³
+    echo ³ %%F ³
+    echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     echo.
     echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     echo ³ Iniciando o build com MSBuild... ³
     echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     echo.
-    %MSBuild% -m %%F /t:Build /p:Configuration=Debug /p:Platform="Any CPU" /p:OutputPath="%buildFolder%"
+    %MSBuild% -m %%F /t:Restore /t:Build /p:Configuration=Debug /p:Platform="Any CPU" /p:OutputPath="%buildFolder%"
     if !errorlevel! equ 0 (
         echo.
         echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -83,7 +107,7 @@ for /r "%rootFolder%" %%F in (*.sln) do (
         echo ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
         echo.
     )
-    %MSBuild% -m %%F /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:OutputPath="%buildFolder%"
+    %MSBuild% -m %%F /t:Restore /t:Build /p:Configuration=Release /p:Platform="Any CPU" /p:OutputPath="%buildFolder%"
     if !errorlevel! equ 0 (
         echo.
         echo ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -100,6 +124,8 @@ for /r "%rootFolder%" %%F in (*.sln) do (
     )
 )
 
+
+:End
 pause
 
 endlocal
